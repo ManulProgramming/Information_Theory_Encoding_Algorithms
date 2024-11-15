@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information Theory</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            width: 90%;
+            max-width: 1920px;
+            height: 90vh;
+            background-color: #e0e0e0;
+            padding: 20px;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .main {
+            flex: 3;
+            padding: 20px;
+            background-color: white;
+            border-radius: 15px;
+            margin-right: 20px;
+            overflow-y: auto;
+        }
+        img {
+            max-width: 90%;
+        }
+        .tabs {
+            flex: 1;
+            padding: 20px;
+            background-color: white;
+            border-radius: 15px;
+            overflow-y: auto;
+        }
+        h2 {
+            margin-bottom: 15px;
+        }
+        .input-box {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #bfbfbf;
+            border-radius: 5px;
+        }
+        .result {
+            margin-bottom: 15px;
+        }
+        .divider {
+            height: 4px;
+            background-color: orange;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .additional-content {
+            margin-bottom: 20px;
+        }
+        .tabs-list {
+            list-style-type: none;
+        }
+        .tabs-list li {
+            margin-bottom: 10px;
+        }
+	    a {
+	        color: black;
+	        text-decoration: none;
+	    }
+
+        @media (max-width: 768px) {
+            body {
+                height: auto;
+                overflow: auto;
+            }
+            .container {
+                flex-direction: column;
+                align-items: center;
+		        margin-top: 20px;
+                width: 95%;
+                height: auto;
+            }
+            .main, .tabs {
+                width: 95%;
+                margin-right: 0;
+                margin-bottom: 20px;
+                max-height: 50vh;
+            }
+            .main, .tabs {
+                overflow-y: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main">
+            <h2>Huffman algorithm</h2>
+            <form id="input-form" method="POST" action="/submit">
+                <input class="input-box" type="text" name="input-box" id="input-box" placeholder="Input a sentence...">
+                <input type="hidden" type="text" name="typeof" value="Huffman"/>
+            </form>
+            <div class="result">
+                <strong>Result:</strong><br><br>
+                <p style="color: red" id="error"></p>
+                <strong>&emsp;Plain text: </strong>{{ result_huffman0 }}<br><br>
+                <strong>&emsp;Tree: </strong>{{ result_huffman1 }}<br><br>
+                <img src="/tree.png"><br>
+                &emsp;{{ result_huffman2 }}
+            </div>
+            <div class="divider"></div>
+            <div class="additional-content">
+                <h3>Information</h3>
+		        <br>
+                <p>&emsp;Huffman Method Algorithm — an algorithm for optimal prefix coding of the alphabet.</p>
+                <p>&emsp;One of the first algorithms for efficient information coding was proposed by Huffman in 1952. This algorithm became the basis for a large number of information compression programs. For example, Huffman coding is used in ARJ, ZIP, RAR compression programs, in the JPEG lossy graphic image compression algorithm, and is also built into modern fax machines.</p>
+                <p>&emsp;Efficient Huffman coding consists of representing the most probable (frequently encountered) letters by binary codes of the shortest length, and the less probable ones by codes of a longer length (if all code words of a shorter length have already been exhausted). This is done in such a way that the average code length per letter of the original message is minimal.</p>
+                <p>&emsp;Huffman coding is a simple algorithm for constructing variable-length codes that have a minimum average length. This very popular algorithm is the basis of many computer programs for compressing text and graphics data. Some of them use the Huffman algorithm directly, while others use it as one of the stages of a multi-level compression process. The Huffman method produces perfect compression (that is, compresses the data to its entropy) if the probabilities of the symbols are exactly equal to negative powers of 2. The algorithm starts building the code tree from the bottom up, then slides down the tree to build each individual code from right to left (from the least significant bit to the most significant).</p>
+                <p>&emsp;The algorithm begins by compiling a list of alphabet symbols in descending order of their probabilities. Then a tree is constructed from the root, with these symbols as leaves. This is done in steps, with the two symbols with the lowest probabilities being selected at each step, added to the top of the partial tree, removed from the list, and replaced by an auxiliary symbol representing these two symbols. The auxiliary symbol is assigned a probability equal to the sum of the probabilities of the symbols selected at that step. When the list is reduced to one auxiliary symbol representing the entire alphabet, the tree is declared complete. The algorithm ends by descending the tree and constructing codes for all symbols.</p>
+                <br><p>&emsp;<b>Coding algorithm</b></p>
+                <p>&emsp;1. The letters of the input alphabet form a list of free nodes of the future coding tree. Each node in this list has a weight equal to the probability of the corresponding letter appearing in the message.</p>
+                <p>&emsp;2. Two free tree nodes with the smallest weights are selected. If there are more than two free nodes with the smallest weights, then any pair can be taken.</p>
+                <p>&emsp;3. Their parent is created with a weight equal to their combined weight.</p>
+                <p>&emsp;4. The parent is added to the list of free nodes, and its two children are removed from this list.</p>
+                <p>&emsp;5. One arc coming out of the parent node is assigned a bit 1, the other one is assigned a bit 0.</p>
+                <p>&emsp;6. Steps 2, 3, 4, 5 are repeated until there is only one node left in the list of free nodes. This node will be the root of the tree. Its weight is equal to one -- the total probability of all the letters in the message.</p>
+                <p>&emsp;7. Now, moving along the code tree from top to bottom and sequentially writing out the binary digits corresponding to the arcs, we can obtain the codes of the letters of the input alphabet.</p><br>
+                <p>&emsp;<b>Example of coding using the Huffman algorithm</b></p>
+                <p>&emsp;Let's say we have a string "AABBCCDEFABCAEFBABFE". Total - 20 characters. Here's how we can encode this string using the Huffman algorithm:</p>
+                <p>&emsp;1. <b>Let's calculate the frequency of each character in the string:</b></p>
+                <p>&emsp;- A: 5 times</p>
+                <p>&emsp;- B: 5 times</p>
+                <p>&emsp;- C: 3 times</p>
+                <p>&emsp;- D: 1 time</p>
+                <p>&emsp;- E: 3 times</p>
+                <p>&emsp;- F: 3 times</p>
+                <p>&emsp;1. <b>Let's create a Huffman tree:</b></p>
+                <p>&emsp;Let's create a Huffman tree starting with the symbols with the lowest frequency. We'll merge the nodes with the lowest frequencies until we create a complete tree.</p>
+                <p>&emsp;Approximate tree construction:</p>
+                <br>
+                &emsp;<img src="/static/huffman_tree_example.png"><br>
+                <p>&emsp;3. <b>We assign a unique code to each symbol</b></p>
+                <p>&emsp;4. <b>Use assigned codes to encode strings</b></p>
+                <p>&emsp;That is, the main point of the algorithm is to assign a shorter code to symbols that occur most frequently, and vice versa, symbols that occur less frequently have a longer code.</p>
+		        <br><br>
+		        <h3>Example:</h3>
+		        <br>
+		        <p>&emsp;Input: <i>AABBCCDEFABCAEFBABFE</i></p>
+		        <br>
+		        <p>&emsp;Result:</p>
+                <p>&emsp;Tree: <i>{'D': '000', 'F': '001', 'B': '01', 'A': '10', 'E': '110', 'C': '111'}</i></p>
+                <br><img src="/static/huffman_tree_example1.png"><br>
+                <p>&emsp;<i>10|10|01|01|111|111|000|110|001|10|01|111|10|110|001|01|10|01|001|110</i></p>
+            </div>
+        </div>
+        <div class="tabs">
+            <h2>Tabs</h2>
+            <ul class="tabs-list">
+                <a href="/"><li>Home</li></a>
+                <a href="/entropy"><li>&emsp;1. Entropy</li></a>
+                <a href="/entropy_of_pair"><li>&emsp;2. Entropy of pair</li></a>
+                <a href="/rle"><li>&emsp;3. RLE</li></a>
+                <a href="/lzw"><li>&emsp;4. LZW</li></a>
+                <a href="/huffman"><li>&emsp;5. Huffman algorithm</li></a>
+                <a href="/arithmetic_coding"><li>&emsp;6. Arithmetic coding</li></a>
+                <a href="/shannon_fano"><li>&emsp;7. Shannon-Fano algorithm</li></a>
+                <a href="/color_histogram"><li>Project</li></a>
+            </ul>
+        </div>
+    </div>
+    <script>
+        document.getElementById('input-form').addEventListener('submit', function(event) {
+            const input = document.getElementById('input-box').value;
+            if (input.length > 512){
+                event.preventDefault();
+                document.getElementById('error').innerText = 'Input string exceeds 512 character limit.';
+            }
+        });
+        function checkSubmit(e) {
+            if (e.keyCode === 13) {
+                document.getElementById('input-form').submit();
+            }
+        }
+    </script>
+</body>
+</html>

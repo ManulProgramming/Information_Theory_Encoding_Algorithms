@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information Theory</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            width: 90%;
+            max-width: 1920px;
+            height: 90vh;
+            background-color: #e0e0e0;
+            padding: 20px;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .main {
+            flex: 3;
+            padding: 20px;
+            background-color: white;
+            border-radius: 15px;
+            margin-right: 20px;
+            overflow-y: auto;
+        }
+        img {
+            max-width: 90%;
+        }
+        .tabs {
+            flex: 1;
+            padding: 20px;
+            background-color: white;
+            border-radius: 15px;
+            overflow-y: auto;
+        }
+        h2 {
+            margin-bottom: 15px;
+        }
+        .input-box {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #bfbfbf;
+            border-radius: 5px;
+        }
+        .result {
+            margin-bottom: 15px;
+        }
+        .divider {
+            height: 4px;
+            background-color: orange;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .additional-content {
+            margin-bottom: 20px;
+        }
+        .tabs-list {
+            list-style-type: none;
+        }
+        .tabs-list li {
+            margin-bottom: 10px;
+        }
+	    a {
+	        color: black;
+	        text-decoration: none;
+	    }
+
+        @media (max-width: 768px) {
+            body {
+                height: auto;
+                overflow: auto;
+            }
+            .container {
+                flex-direction: column;
+                align-items: center;
+		        margin-top: 20px;
+                width: 95%;
+                height: auto;
+            }
+            .main, .tabs {
+                width: 95%;
+                margin-right: 0;
+                margin-bottom: 20px;
+                max-height: 50vh;
+            }
+            .main, .tabs {
+                overflow-y: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main">
+            <h2>LZW</h2>
+            <form id="input-form" method="POST" action="/submit">
+                <input class="input-box" type="text" name="input-box" id="input-box" placeholder="Input a sentence...">
+                <input type="hidden" type="text" name="typeof" value="LZW"/>
+            </form>
+            <div class="result">
+                <strong>Result:</strong></br></br>
+                <p style="color: red" id="error"></p>
+                <strong>&emsp;Plain text: </strong>{{ result_lzw0 }}<br><br>
+                &emsp;{{ result_lzw1 }}
+            </div>
+            <div class="divider"></div>
+            <div class="additional-content">
+                <h3>Information</h3>
+		        <br>
+                <p>&emsp;Statistical coding methods aimed at compressing the transmitted information - such as Huffman or Shannon- Fano prefix codes - require preliminary analysis of the entire coded document and the compilation of a code table. The latter must be known to the decoder or, in the general case, be attached to the coded document.</p>
+                <p>&emsp;Is it possible to implement the process of encoding with compression without preliminary statistical analysis? In other words, we want to organize encoding of the source in a streaming mode, i.e. as the encoded data arrives, and form a code table (dictionary) simultaneously with encoding (or with a slight delay), dynamically replenishing it taking into account “past experience” — the initial piece of the document already encoded in this way. This is exactly what is proposed in the LZW algorithm.</p>
+                <p>&emsp;The algorithm got its name from the first letters of the names of its developers - Lempel , Ziv and Welch . Unlike RLE, compression in it is performed by means of identical byte chains. The LZW algorithm is the most famous representative of the dictionary methods family.</p>
+                <p>&emsp;This algorithm is a modification of another method by Abraham Lempel ( Abraham Lempel ) and Jacob Ziv ( Jacob Ziv ) - LZ78. Author of the modification - Terry Welch ( Terry Welch ).</p>
+                <p>&emsp;LZW compression replaces character strings with some codes. This is done without any analysis of the input text. Instead, a table of strings is looked up each time a new character string is added. Compression occurs when a code replaces a character string. The codes generated by the LZW algorithm can be of any length, but they must contain more bits than a single character.</p>
+                <p>&emsp;The compression process is as follows. The input stream characters are read sequentially and a check is made to see if such a string exists in the created string table. If such a string exists, the next character is read, and if the string does not exist, the code for the previously found string is entered into the stream, the string is entered into the table, and the search begins again.</p>
+                <p>&emsp;For example, if byte data (text) is compressed, then the table will have 256 rows (from "0" to "255"). If a 10-bit code is used, then the values in the range from 256 to 1023 remain for the codes for the rows. New rows form the table sequentially, i.e., the row index can be considered its code.</p>
+                <br>
+                <p>&emsp;Conventionally, the coding algorithm can be described as follows:</p>
+                <p>&emsp;1. Initialize the dictionary with all possible single-character phrases. Initialize the input phrase ω with the first character of the message.</p>
+                <p>&emsp;2. Read the next symbol K from the encoded message.</p>
+                <p>&emsp;3. If END_OF_MESSAGE, then output the code for ω, otherwise:</p>
+                <p>&emsp;4. If the phrase ω(K) is already in the dictionary, assign the input phrase to the value ω(K) and go to Step 2, otherwise output the code ω, add ω(K) to the dictionary, assign the input phrase to the value K and go to Step 2.</p>
+                <p>&emsp;5. End</p>
+                <br>
+                <p>&emsp;<b>Example of coding</b></p>
+                <p>&emsp;Let us compress the sequence <b>"abacabadabacabae"</b>.</p>
+                <p>&emsp;Step 1: Then, according to the algorithm described above, we will add "a" to the initially empty string and check if the string "a" is in the table. Since we entered all the strings of one character into the table during initialization, the string "a" is in the table.</p>
+                <p>&emsp;Step 2: Next we read the next character "b" from the input stream and check if the string "ab" is in the table. There is no such string in the table yet.</p>
+                <p>&emsp;Add to table <5> "ab". To stream: <0>;</p>
+                <p>&emsp;Step 3: "ba" — no. To table: <6> "ba". To stream: <1>;</p>
+                <p>&emsp;Step 4: "ac" — no. To table: <7> "ac". To stream: <0>;</p>
+                <p>&emsp;Step 5: "ca" — no. To table: <8> "ca". To stream: <2>;</p>
+                <p>&emsp;Step 6: "ab" — is in the table; "aba" — is not. To the table: <9> "aba". To the stream: <5>;</p>
+                <p>&emsp;Step 7: "ad" — no. To table: <10> "ad". To stream: <0>;</p>
+                <p>&emsp;Step 8: "da" — no. To table: <11> "da". To stream: <3>;</p>
+                <p>&emsp;Step 9: "aba" — is in the table; "abac" — is not. To the table: <12> "abac". To the stream: <9>;</p>
+                <p>&emsp;Step 10: "ca" — is in the table; "cab" — is not. To the table: <13> "cab". To the stream: <8>;</p>
+                <p>&emsp;Step 11: "ba" — is in the table; "bae" — is not. To table: <14> "bae". To stream: <6>;</p>
+                <p>&emsp;Step 12: And finally the last line is “e”, after that comes the end of the message, so we just output <4> to the stream.</p>
+                <p>&emsp;So we get the encoded message <b>"0 1 0 2 5 0 3 9 8 6 4"</b>, which is 11 bits shorter.</p>
+                <br>
+                <p>&emsp;Table 1. Dictionary construction during decoding</p>
+                <br>
+                &emsp;<img src="/static/lzw_table_example.png">
+		        <br><br>
+		        <h3>Example:</h3>
+		        <br>
+		        <p>&emsp;Input: <i>abacabadabacabae</i></p>
+		        <br>
+		        <p>&emsp;Result: <i>97|98|97|99|256|97|100|260|259|257|101</i></p>
+            </div>
+        </div>
+        <div class="tabs">
+            <h2>Tabs</h2>
+            <ul class="tabs-list">
+                <a href="/"><li>Home</li></a>
+                <a href="/entropy"><li>&emsp;1. Entropy</li></a>
+                <a href="/entropy_of_pair"><li>&emsp;2. Entropy of pair</li></a>
+                <a href="/rle"><li>&emsp;3. RLE</li></a>
+                <a href="/lzw"><li>&emsp;4. LZW</li></a>
+                <a href="/huffman"><li>&emsp;5. Huffman algorithm</li></a>
+                <a href="/arithmetic_coding"><li>&emsp;6. Arithmetic coding</li></a>
+                <a href="/shannon_fano"><li>&emsp;7. Shannon-Fano algorithm</li></a>
+                <a href="/color_histogram"><li>Project</li></a>
+            </ul>
+        </div>
+    </div>
+    <script>
+        document.getElementById('input-form').addEventListener('submit', function(event) {
+            const input = document.getElementById('input-box').value;
+            if (input.length > 512){
+                event.preventDefault();
+                document.getElementById('error').innerText = 'Input string exceeds 512 character limit.';
+            }
+        });
+        function checkSubmit(e) {
+            if (e.keyCode === 13) {
+                document.getElementById('input-form').submit();
+            }
+        }
+    </script>
+</body>
+</html>
